@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>iframe 播放頁</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { background: #000; color: #fff; text-align: center; padding: 2rem; }
+    iframe { width: 100%; max-width: 640px; height: 360px; border: none; }
+  </style>
+</head>
+<body>
+  <h1>🎥 安全播放 (iframe 版)</h1>
+  <div id="iframe-box">載入中...</div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const uuid = params.get("uuid") || "";
+    const uid = uuid.substring(0, 14);
+    const token = uuid.substring(16);
+
+    fetch(`https://script.google.com/macros/s/AKfycby_NzGLN-vWNoP9BL8WFaWdB6wTP0L77Jjt6Wg34zWW4SqOvJFyNduDVkkc9XKg7j3NYw/exec?action=use_token&uid=${uid}&token=${token}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          document.getElementById("iframe-box").innerHTML = `<p style="color:red;">❌ ${data.message}</p>`;
+          return;
+        }
+        const { otp, playbackInfo } = data;
+        const src = `https://player.vdocipher.com/v2/?otp=${encodeURIComponent(otp)}&playbackInfo=${encodeURIComponent(playbackInfo)}`;
+        document.getElementById("iframe-box").innerHTML = `<iframe src="${src}" allowfullscreen allow="encrypted-media"></iframe>`;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("iframe-box").innerHTML = '<p style="color:red;">❌ 載入播放內容失敗</p>';
+      });
+  </script>
+</body>
+</html>

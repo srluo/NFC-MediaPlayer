@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>JS 播放頁 (Proxy 版)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://proxy.srluo.workers.dev/vdo.js"></script>
+  <style>
+    body { background: #000; color: #fff; text-align: center; padding: 2rem; }
+    #vdo-player { width: 100%; max-width: 640px; margin: auto; }
+    .error { color: #f55; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🔐 安全播放 (Proxy vdo.js)</h1>
+  <div id="status">載入中...</div>
+  <div id="vdo-player"></div>
+
+  <script>
+    const apiURL = "https://script.google.com/macros/s/AKfycby_NzGLN-vWNoP9BL8WFaWdB6wTP0L77Jjt6Wg34zWW4SqOvJFyNduDVkkc9XKg7j3NYw/exec";
+    const params = new URLSearchParams(location.search);
+    const uuid = params.get("uuid") || "";
+    const uid = uuid.substring(0, 14);
+    const token = uuid.substring(16);
+    const statusDiv = document.getElementById("status");
+
+    if (!uuid || uuid.length < 32) {
+      statusDiv.innerHTML = '<p class="error">❌ 錯誤：連結格式不正確</p>';
+    } else {
+      fetch(`${apiURL}?action=use_token&uid=${uid}&token=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.success) {
+            statusDiv.innerHTML = `<p class="error">❌ ${data.message}</p>`;
+            return;
+          }
+
+          if (typeof VdoPlayer === 'undefined') {
+            statusDiv.innerHTML = '<p class="error">❌ 無法載入 VdoCipher 播放器</p>';
+            return;
+          }
+
+          const { otp, playbackInfo } = data;
+          const player = new VdoPlayer({
+            otp,
+            playbackInfo,
+            container: "#vdo-player"
+          });
+
+          player.addEventListener("load", () => {
+            statusDiv.textContent = "✅ 播放器已載入";
+          });
+
+          player.addEventListener("error", (e) => {
+            statusDiv.innerHTML = `<p class="error">❌ 播放器錯誤：${JSON.stringify(e)}</p>`;
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          statusDiv.innerHTML = '<p class="error">❌ 載入播放內容失敗</p>';
+        });
+    }
+  </script>
+</body>
+</html>
