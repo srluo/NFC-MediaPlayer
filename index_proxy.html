@@ -2,22 +2,41 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>JS 播放頁 (Proxy 版)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://proxy.srluo.workers.dev/vdo.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>安全播放（Proxy版）</title>
+  <script src="https://vdoproxy.washow-cc.workers.dev/vdo-proxy/1.7.8/vdo.js"></script>
   <style>
-    body { background: #000; color: #fff; text-align: center; padding: 2rem; }
-    #vdo-player { width: 100%; max-width: 640px; margin: auto; }
-    .error { color: #f55; font-weight: bold; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    #vdo-player {
+      width: 100%;
+      max-width: 640px;
+      margin: 1rem auto;
+    }
+    .error {
+      color: #f55;
+      font-weight: bold;
+    }
+    .countdown {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #f88;
+    }
   </style>
 </head>
 <body>
-  <h1>🔐 安全播放 (Proxy vdo.js)</h1>
+  <h1>🎵 安全音樂播放</h1>
   <div id="status">載入中...</div>
   <div id="vdo-player"></div>
+  <div id="countdown" class="countdown"></div>
 
   <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbyECF-YHmLrDF0DPWOXTR-a9vEn1WtVq-_iMRSw9SCoMgXX5M0dWRTbOVC713hssgwDvg/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycby_NzGLN-vWNoP9BL8WFaWdB6wTP0L77Jjt6Wg34zWW4SqOvJFyNduDVkkc9XKg7j3NYw/exec";
     const params = new URLSearchParams(location.search);
     const uuid = params.get("uuid") || "";
     const uid = uuid.substring(0, 14);
@@ -41,23 +60,37 @@
           }
 
           const { otp, playbackInfo } = data;
+
           const player = new VdoPlayer({
             otp,
             playbackInfo,
+            theme: "9ae8bbe8dd964ddc9bdb932cca1cb59a",
             container: "#vdo-player"
           });
 
           player.addEventListener("load", () => {
-            statusDiv.textContent = "✅ 播放器已載入";
-          });
+            statusDiv.innerHTML = "✅ 播放器已載入，影片即將播放";
 
-          player.addEventListener("error", (e) => {
-            statusDiv.innerHTML = `<p class="error">❌ 播放器錯誤：${JSON.stringify(e)}</p>`;
+            // ⏳ 倒數 5 分鐘（300 秒）
+            const countdownEl = document.getElementById("countdown");
+            let secondsLeft = 300;
+
+            const timer = setInterval(() => {
+              secondsLeft--;
+              const min = Math.floor(secondsLeft / 60);
+              const sec = (secondsLeft % 60).toString().padStart(2, "0");
+              countdownEl.textContent = `⏳ 本頁將於 ${min}:${sec} 後自動關閉`;
+
+              if (secondsLeft <= 0) {
+                clearInterval(timer);
+                window.location.href = "expired.html"; // 可自訂跳轉頁
+              }
+            }, 1000);
           });
         })
         .catch(err => {
           console.error(err);
-          statusDiv.innerHTML = '<p class="error">❌ 載入播放內容失敗</p>';
+          statusDiv.innerHTML = '<p class="error">❌ 無法載入播放內容</p>';
         });
     }
   </script>
