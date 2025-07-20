@@ -19,7 +19,7 @@
     const uid = uuid.substring(0, 14);
     const token = uuid.substring(16);
 
-    fetch(`https://script.google.com/macros/s/AKfycby_NzGLN-vWNoP9BL8WFaWdB6wTP0L77Jjt6Wg34zWW4SqOvJFyNduDVkkc9XKg7j3NYw/exec?action=use_token&uid=${uid}&token=${token}`)
+    fetch(`https://script.google.com/macros/s/AKfycbyECF-YHmLrDF0DPWOXTR-a9vEn1WtVq-_iMRSw9SCoMgXX5M0dWRTbOVC713hssgwDvg/exec?action=use_token&uid=${uid}&token=${token}`)
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
